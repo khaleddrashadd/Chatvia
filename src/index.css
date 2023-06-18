@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+::-webkit-scrollbar {
+  width: 5px;
+  @apply bg-white
+}
+::-webkit-scrollbar-track {
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300;
+  border-radius: 100px;
+}
+
+
+.placeholder-config {
+  @apply focus:placeholder:text-xs;
+  @apply focus:placeholder:relative;
+  @apply focus:placeholder:top-[-14px];
+  @apply focus:placeholder:z-10;
+}
