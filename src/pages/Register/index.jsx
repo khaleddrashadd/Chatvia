@@ -19,7 +19,7 @@ const Register = () => {
     enteredValue: enteredName,
     hasError: hasErrorName,
     valueIsValid: nameIsValid,
-  } = useInput(value =>NAME_REGEX.test(value.trim()));
+  } = useInput(value => NAME_REGEX.test(value.trim()));
 
   const {
     handleChangeInput: handleChangeEmail,
@@ -54,24 +54,26 @@ const Register = () => {
             console.log(error);
           },
           () => {
-            getDownloadURL(uploadTask.snapshot.ref).then(async downloadURL => {
-              try {
-                await updateProfile(user, {
-                  displayName: enteredName,
-                  photoURL: downloadURL,
-                });
-                await setDoc(doc(db, 'users', user.uid), {
-                  uid: user.uid,
-                  enteredName,
-                  enteredEmail,
-                  photoURL: downloadURL,
-                });
-                console.log(user);
-                navigate('/', { replace: true });
-              } catch (err) {
-                console.log(err);
-              }
-            });
+            getDownloadURL(uploadTask.snapshot.ref)
+              .then(async downloadURL => {
+                try {
+                  await updateProfile(user, {
+                    displayName: enteredName,
+                    photoURL: downloadURL,
+                  });
+                  await setDoc(doc(db, 'users', user.uid), {
+                    uid: user.uid,
+                    enteredName,
+                    enteredEmail,
+                    photoURL: downloadURL,
+                  });
+                  console.log(user);
+                  navigate('/', { replace: true });
+                } catch (err) {
+                  console.log(err);
+                }
+              })
+              .catch(err => console.log(err));
           }
         );
         // ...
@@ -132,7 +134,9 @@ const Register = () => {
           {file && (
             <div>
               <TiTick className="text-green-600 text-2xl inline" />
-              <span className="text-green-600 text-sm">Uploaded Succesfully</span>
+              <span className="text-green-600 text-sm">
+                Uploaded Succesfully
+              </span>
             </div>
           )}
           <button

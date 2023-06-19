@@ -4,7 +4,6 @@ import LoadingSpinner from './LoadingSpinner';
 
 const ProtectRoutes = () => {
   const { user, isLoading } = useAuth();
-  console.log('💥 ~ ProtectRoutes ~ isLoading', isLoading);
 
   const location = useLocation();
 
