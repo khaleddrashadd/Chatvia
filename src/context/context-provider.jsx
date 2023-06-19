@@ -4,22 +4,23 @@ import { auth } from '../lib/firebase/firebase';
 import authContext from './auth-context';
 
 const AuthContextProvider = ({ children }) => {
-  const [user, setUser] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-  
-  console.log('💥 ~ AuthContextProvider ~ user', user);
-  
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
-    setIsLoading(true);
     const unsub = onAuthStateChanged(auth, user => {
       setUser(user);
-      setIsLoading(false);
+      setIsLoading(false)
     });
     return () => {
       unsub();
     };
   }, []);
 
-  return <authContext.Provider value={{user,isLoading}}>{children}</authContext.Provider>;
+  return (
+    <authContext.Provider value={{ user, isLoading }}>
+      {children}
+    </authContext.Provider>
+  );
 };
 export default AuthContextProvider;

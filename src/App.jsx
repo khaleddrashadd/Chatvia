@@ -1,6 +1,6 @@
 import { Route, Routes } from 'react-router-dom';
 import { Home, Login, Register } from './pages';
-import ProtectRoutes from './components/ProtectRoutes';
+import {ProtectRoutes} from './components';
 
 const App = () => {
   return (

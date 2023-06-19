@@ -3,6 +3,8 @@ import { Input } from '../../components';
 import useInput from '../../hooks/use-input';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../lib/firebase/firebase';
+import { MAIL_REGEX, PASSWORD_REGEX } from '../../utils';
+
 
 const Register = () => {
   const navigate = useNavigate();
@@ -13,14 +15,14 @@ const Register = () => {
     enteredValue: enteredEmail,
     hasError: hasErrorEmail,
     valueIsValid: emailIsValid,
-  } = useInput(value => value.includes('@'));
+  } = useInput(value => MAIL_REGEX.test(value.trim()));
   const {
     handleChangeInput: handleChangePassword,
     handleBlurInput: handleBlurPassword,
     enteredValue: enteredPassword,
     hasError: hasErrorPassword,
     valueIsValid: passwordIsValid,
-  } = useInput(value => value.length >= 6);
+  } = useInput(value => PASSWORD_REGEX.test(value.trim()));
 
   const handleSubmit = e => {
     e.preventDefault();
@@ -35,7 +37,7 @@ const Register = () => {
       .catch(error => {
         const errorCode = error.code;
         const errorMessage = error.message;
-        console.log( errorMessage);
+        console.log(errorMessage);
       });
   };
   const formIsValid = emailIsValid && passwordIsValid;
@@ -64,7 +66,9 @@ const Register = () => {
             hasError={hasErrorPassword}
             value={enteredPassword}
             placeholder={
-              hasErrorPassword ? 'Enter a valid Password (>6)' : 'Your Password'
+              hasErrorPassword
+                ? 'Invalid Password (>8 contains a Digit and a Caps at least)'
+                : 'Your Password'
             }
           />
           <button

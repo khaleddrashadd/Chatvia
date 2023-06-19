@@ -7,6 +7,9 @@ import useInput from '../../hooks/use-input';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { doc, setDoc } from 'firebase/firestore';
 import { useState } from 'react';
+import { TiTick } from 'react-icons/ti';
+import { MAIL_REGEX, PASSWORD_REGEX } from '../../utils';
+import { NAME_REGEX } from '../../utils/constants';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -16,7 +19,7 @@ const Register = () => {
     enteredValue: enteredName,
     hasError: hasErrorName,
     valueIsValid: nameIsValid,
-  } = useInput(value => value.trim() !== '');
+  } = useInput(value =>NAME_REGEX.test(value.trim()));
 
   const {
     handleChangeInput: handleChangeEmail,
@@ -24,14 +27,14 @@ const Register = () => {
     enteredValue: enteredEmail,
     hasError: hasErrorEmail,
     valueIsValid: emailIsValid,
-  } = useInput(value => value.includes('@'));
+  } = useInput(value => MAIL_REGEX.test(value.trim()));
   const {
     handleChangeInput: handleChangePassword,
     handleBlurInput: handleBlurPassword,
     enteredValue: enteredPassword,
     hasError: hasErrorPassword,
     valueIsValid: passwordIsValid,
-  } = useInput(value => value.length >= 6);
+  } = useInput(value => PASSWORD_REGEX.test(value.trim()));
 
   const [file, setFile] = useState('');
 
@@ -41,7 +44,6 @@ const Register = () => {
     e.preventDefault();
     createUserWithEmailAndPassword(auth, enteredEmail, enteredPassword)
       .then(userCredential => {
-        // Signed in
         const user = userCredential.user;
 
         const storageRef = ref(storage, enteredName);
@@ -113,7 +115,9 @@ const Register = () => {
             hasError={hasErrorPassword}
             value={enteredPassword}
             placeholder={
-              hasErrorPassword ? 'Enter a valid Password (>6)' : 'Your Password'
+              hasErrorPassword
+                ? 'Invalid Password (>8 contains a Digit and a Caps at least)'
+                : 'Your Password'
             }
           />
           <Input
@@ -123,7 +127,14 @@ const Register = () => {
             onChange={e => setFile(e.target.files[0])}
             accept=".jpg,.png,.jpeg"
             src={addAvatar}
+            hasFile={!!file}
           />
+          {file && (
+            <div>
+              <TiTick className="text-green-600 text-2xl inline" />
+              <span className="text-green-600 text-sm">Uploaded Succesfully</span>
+            </div>
+          )}
           <button
             disabled={!formIsValid}
             className={`bg-main text-white w-full py-2 rounded-sm hover:bg-main-dark ${

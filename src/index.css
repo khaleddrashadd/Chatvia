@@ -16,7 +16,8 @@
 
 
 .placeholder-config {
-  @apply focus:placeholder:text-xs;
+  @apply placeholder:text-[12px];
+  @apply focus:placeholder:text-[10px];
   @apply focus:placeholder:relative;
   @apply focus:placeholder:top-[-14px];
   @apply focus:placeholder:z-10;
