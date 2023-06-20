@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { addAvatar, img } from '../../assets';
+import { useEffect, useRef, useState } from 'react';
+import { img } from '../../assets';
 import {
   Timestamp,
   arrayUnion,
@@ -13,14 +13,14 @@ import { useAuth } from '../../hooks/use-auth';
 import { v4 as uuid } from 'uuid';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { TiTick } from 'react-icons/ti';
+import { createdAt } from '../../utils';
+import useTheme from '../../hooks/use-theme';
 
-const Messages = ({ currentUser, chatId }) => {
+const Messages = ({ currentUser, chatId, handleLastMessage, isDarkMode }) => {
   const { user } = useAuth();
   const [chats, setChats] = useState([]);
-  // console.log("💥 ~ Messages ~ chats", chats)
-
+  const scrollRef = useRef();
   const [messages, setMessages] = useState([]);
-  // console.log("💥 ~ Messages ~ messages", messages)
 
   const [file, setFile] = useState('');
   const [text, setText] = useState('');
@@ -33,8 +33,6 @@ const Messages = ({ currentUser, chatId }) => {
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, 'chats', chatId), doc => {
-      console.log("💥 ~ unsub ~ chatId", chatId)
-
       doc.exists() && setMessages(doc.data().messages);
     });
     return () => {
@@ -42,7 +40,13 @@ const Messages = ({ currentUser, chatId }) => {
     };
   }, [chatId]);
 
-  const handleSend = async () => {
+  useEffect(() => {
+    handleLastMessage(chats, chatId);
+    scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [messages, handleLastMessage, chats, chatId]);
+
+  const handleSend = async e => {
+    e.preventDefault();
     if (!text && !file) return;
     if (file) {
       const storageRef = ref(storage, uuid());
@@ -94,25 +98,26 @@ const Messages = ({ currentUser, chatId }) => {
     setText('');
     setFile('');
   };
-  console.log(Object.entries(chats));
   return (
     <div className="flex-1 flex flex-col pb-4">
-      {Object.entries(chats).map(chat => (
-        <div
-          key={chat[0]}
-          className="flex items-center justify-center bg-light py-3">
-          <img
-            src={chat[1]?.userInfo?.photoURL}
-            alt="avatar"
-            className="w-12 h-12 rounded-[50%] mr-4 object-cover"
-          />
-          <span className="font-bold text-xl">
-            {chat[1].userInfo?.displayName}
-          </span>
-        </div>
-      ))}
+      <div
+        key={chats[chatId]}
+        className={`flex items-center justify-center ${
+          isDarkMode ? 'bg-darker text-white' : 'bg-light text-black'
+        } py-3`}>
+        <img
+          src={chats[chatId]?.userInfo?.photoURL}
+          alt="avatar"
+          className="w-12 h-12 rounded-[50%] mr-4 object-cover"
+        />
+        <span className="font-bold text-xl">
+          {chats[chatId]?.userInfo?.displayName}
+        </span>
+      </div>
 
-      <div className="h-4/5 px-3 overflow-x-hidden py-3 flex flex-col gap-4">
+      <div
+        className="h-4/5 px-3 overflow-x-hidden py-3 flex flex-col gap-4"
+        ref={scrollRef}>
         {messages.map(m => {
           const isMe = m?.senderId === user.uid;
           return (
@@ -130,7 +135,7 @@ const Messages = ({ currentUser, chatId }) => {
                     className="w-16 h-16  rounded-[50%] object-cover "
                   />
                   <span className="text-gray-300 text-sm w-fit whitespace-nowrap">
-                    just Now
+                    {createdAt(m)}
                   </span>
                 </div>
                 {m?.text && (
@@ -157,13 +162,17 @@ const Messages = ({ currentUser, chatId }) => {
           );
         })}
       </div>
-      <div className="flex px-4 gap-4 items-center flex-1">
+      <form
+        className="flex px-4 gap-4 items-center flex-1"
+        onSubmit={handleSend}>
         <input
           onChange={e => setText(e.target.value)}
           value={text}
           type="text"
           placeholder="Type something ..."
-          className="w-full font-medium text-lg p-2 rounded-lg border-2 focus:outline-main"
+          className={`w-full font-medium text-lg p-2 ${
+            isDarkMode && 'bg-darker'
+          } rounded-lg border-2 focus:outline-main`}
         />
         <label htmlFor="file">
           <img
@@ -190,13 +199,10 @@ const Messages = ({ currentUser, chatId }) => {
             </span>
           </div>
         )}
-
-        <button
-          onClick={handleSend}
-          className="bg-main hover:bg-main-dark text-white p-2 rounded-lg">
+        <button className="bg-main hover:bg-main-dark text-white p-2 rounded-lg">
           send
         </button>
-      </div>
+      </form>
     </div>
   );
 };

@@ -30,7 +30,6 @@ const Register = () => {
     signInWithEmailAndPassword(auth, enteredEmail, enteredPassword)
       .then(userCredential => {
         // Signed in
-        const user = userCredential.user;
         // ...
         navigate('/', { replace: true });
       })

@@ -11,7 +11,7 @@ export default {
         //for nav
         lighter: '#F5F7FB',
         //for bg
-        darkest: '#1E2139',
+        darkest: '#252c3b',
         //for nav
         darker: '#303841',
         //for received msg and hover
