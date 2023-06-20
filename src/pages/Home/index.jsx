@@ -7,28 +7,80 @@ import Messages from './Messages';
 import { auth, db } from '../../lib/firebase/firebase';
 import { useAuth } from '../../hooks/use-auth';
 import { useRef, useState } from 'react';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
+} from 'firebase/firestore';
 const Home = () => {
   const { user } = useAuth();
   const [userQuery, setUserQuery] = useState([]);
+  const [currentUser, setCurrentUser] = useState({});
+  const [isSelected, setIsSelected] = useState(false);
   const inputRef = useRef();
+  const idRef = useRef();
 
-  const handleSearch = () => {
+  const handleSearch = event => {
+    if (event.key !== 'Enter') return;
     const userName = inputRef.current.value;
     if (userName) {
       const userRef = collection(db, 'users');
       // Our condition.
       const q = query(userRef, where('enteredName', '==', userName));
       const queryData = [];
-      getDocs(q).then(querySnapshot => {
-        querySnapshot.forEach(doc => {
-          queryData.push(doc.data());
+      getDocs(q)
+        .then(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            queryData.push(doc.data());
+          });
+          setUserQuery(queryData);
+        })
+        .catch(err => {
+          console.log(err);
         });
-        setUserQuery(queryData);
-      });
     }
   };
-  console.log(userQuery);
+
+  const handleSelect = async currUser => {
+    setCurrentUser(currUser);
+    // const combinedId = user.uid + currUser.uid;
+    const combinedId = user.uid > currUser.uid ? user.uid + currUser.uid : currUser.uid + user.uid;
+
+    idRef.current = combinedId;
+    try {
+      const res = await getDoc(doc(db, 'chats', combinedId));
+      if (!res.exists()) {
+        await setDoc(doc(db, 'chats', combinedId), { messages: [] });
+
+        await updateDoc(doc(db, 'userChats', user.uid), {
+          [`${combinedId}.userInfo`]: {
+            uid: user.uid,
+            displayName: user.displayName,
+            photoURL: user.photoURL,
+          },
+          [`${combinedId}.date`]: serverTimestamp(),
+        });
+        await updateDoc(doc(db, 'userChats', currUser.uid), {
+          [`${combinedId}.userInfo`]: {
+            uid: currUser.uid,
+            displayName: currUser.enteredName,
+            photoURL: currUser.photoURL,
+          },
+          [`${combinedId}.date`]: serverTimestamp(),
+        });
+      }
+      setIsSelected(true);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <div className="flex h-screen overflow-hidden">
       <div className="flex flex-col items-center gap-24 text-3xl bg-white w-12 my-4">
@@ -47,7 +99,7 @@ const Home = () => {
             <img
               src={user?.photoURL}
               alt="avatar"
-              className="w-8 h-8 rounded-full object-cover inline mr-2"
+              className="w-8 h-8 rounded-full inline mr-2 object-cover"
             />
             <span className="font-semibold text-gray-600">
               {user?.displayName}
@@ -71,11 +123,17 @@ const Home = () => {
             <People
               userQuery={user}
               key={user.uid}
+              onClick={() => handleSelect(user)}
             />
           ))}
         </div>
       </div>
-      <Messages />
+      {isSelected && (
+        <Messages
+          currentUser={currentUser}
+          chatId={idRef.current}
+        />
+      )}
       <div></div>
     </div>
   );

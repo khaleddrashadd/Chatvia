@@ -68,6 +68,8 @@ const Register = () => {
                     photoURL: downloadURL,
                   });
                   console.log(user);
+                  await setDoc(doc(db, 'userChats', user.uid), {});
+
                   navigate('/', { replace: true });
                 } catch (err) {
                   console.log(err);

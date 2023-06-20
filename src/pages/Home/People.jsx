@@ -1,13 +1,13 @@
 import { addAvatar } from '../../assets';
 
-const People = ({ userQuery }) => {
+const People = ({ userQuery,onClick }) => {
   return (
     // <div className="overflow-x-hidden h-3/5 scrollbar">
-      <div className="flex items-center cursor-pointer hover:bg-light rounded-sm duration-300">
+      <div className="flex items-center cursor-pointer hover:bg-light rounded-sm duration-300" onClick={onClick}>
         <img
           src={userQuery?.photoURL}
           alt="avatar"
-          className="block mr-2 w-10 h-10 rounded-[50%]"
+          className="block mr-2 w-10 h-10 rounded-[50%] object-cover"
         />
         <div className="flex flex-col">
           <span className="block font-semibold text-grey-500">
