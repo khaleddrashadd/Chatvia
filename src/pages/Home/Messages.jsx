@@ -171,7 +171,7 @@ const Messages = ({ currentUser, chatId, handleLastMessage, isDarkMode }) => {
           type="text"
           placeholder="Type something ..."
           className={`w-full font-medium text-lg p-2 ${
-            isDarkMode && 'bg-darker'
+            isDarkMode && 'bg-darker text-white'
           } rounded-lg border-2 focus:outline-main`}
         />
         <label htmlFor="file">
