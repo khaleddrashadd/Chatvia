@@ -31,8 +31,6 @@ const Home = () => {
   const { isDarkMode, toggleTheme } = useTheme();
 
   const handleSearch = event => {
-    console.log("searching");
-    event.preventDefault();
     if (event.key !== 'Enter') return;
     const userName = inputRef.current.value;
     if (!userName) return;
@@ -151,14 +149,14 @@ const Home = () => {
               LogOut
             </button>
           </div>
-            <input
-              type="text"
-              className="text-gray-600 bg-light border-b-2 border-gray-300 rounded-lg placeholder:text-sm h-8 px-2 my-4 focus:outline-none placeholder-config caret-slate-400 shadow-lg"
-              placeholder="Search for friends"
-              ref={inputRef}
-              onKeyDown={handleSearch}
-              onTouchStart={handleSearch}
-            />
+          <input
+            type="text"
+            className="text-gray-600 bg-light border-b-2 border-gray-300 rounded-lg placeholder:text-sm h-8 px-2 my-4 focus:outline-none placeholder-config caret-slate-400 shadow-lg"
+            placeholder="Search for friends"
+            ref={inputRef}
+            onKeyDown={handleSearch}
+            onTouchStart={handleSearch}
+          />
           <div className="overflow-x-hidden h-3/5 scrollbar space-y-3">
             {userQuery.map(user => (
               <People
