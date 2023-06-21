@@ -1,4 +1,3 @@
-import { addAvatar } from '../assets';
 
 const Input = ({
   type,
