@@ -14,18 +14,21 @@ import { v4 as uuid } from 'uuid';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { TiTick } from 'react-icons/ti';
 import { createdAt } from '../../utils';
-import useTheme from '../../hooks/use-theme';
+import { BsFillMicFill } from 'react-icons/bs';
+import { BiSend } from 'react-icons/bi';
 
 const Messages = ({ currentUser, chatId, handleLastMessage, isDarkMode }) => {
   const { user } = useAuth();
   const [chats, setChats] = useState([]);
   const scrollRef = useRef();
+  const audioRef = useRef();
   const [messages, setMessages] = useState([]);
 
   const [file, setFile] = useState('');
   const [text, setText] = useState('');
+  console.log('💥 ~ Messages ~ chatId', chats);
   useEffect(() => {
-    const unsub = onSnapshot(doc(db, 'userChats', user?.uid), doc => {
+    const unsub = onSnapshot(doc(db, 'userChats', currentUser?.uid), doc => {
       setChats(doc.data());
     });
     return () => unsub();
@@ -49,9 +52,11 @@ const Messages = ({ currentUser, chatId, handleLastMessage, isDarkMode }) => {
     e.preventDefault();
     if (!text && !file) return;
     if (file) {
-      const storageRef = ref(storage, uuid());
+      const storageRef = ref(storage, 'image-message/' + uuid());
       const uploadTask = uploadBytesResumable(storageRef, file);
       uploadTask.on(
+        'state_changed',
+        () => {},
         err => {
           console.log(err);
         },
@@ -97,6 +102,49 @@ const Messages = ({ currentUser, chatId, handleLastMessage, isDarkMode }) => {
     });
     setText('');
     setFile('');
+  };
+
+  const handleRecord = async () => {
+    if (!navigator && navigator.mediaDevices) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: false,
+      });
+      audioRef.current = new MediaRecorder(stream);
+      audioRef.current.start();
+      audioRef.current.ondataavailable = e => {
+        const audioBlob = new Blob([e.data], { type: 'audio/wav' });
+        const file = new FormData();
+        file.append('voice', audioBlob);
+
+        const storageRef = ref(storage, 'voices/' + uuid());
+        const uploadTask = uploadBytesResumable(storageRef, audioBlob);
+        uploadTask.on(
+          'state_changed',
+          () => {},
+          () => {},
+          () => {
+            getDownloadURL(uploadTask.snapshot.ref).then(async downloadUrl => {
+              console.log(downloadUrl);
+              await updateDoc(doc(db, 'chats', chatId), {
+                messages: arrayUnion({
+                  voiceUrl: downloadUrl,
+                  senderId: user.uid,
+                  id: uuid(),
+                  createdAt: Timestamp.now(),
+                }),
+              });
+            });
+          }
+        );
+      };
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const handleSendRecord = () => {
+    audioRef.current.stop();
   };
   return (
     <div className="flex-1 flex flex-col pb-4">
@@ -158,6 +206,14 @@ const Messages = ({ currentUser, chatId, handleLastMessage, isDarkMode }) => {
                   } border-8`}
                 />
               )}
+              {m?.voiceUrl && (
+                <audio
+                  src={m?.voiceUrl}
+                  controls="button"
+                  controlsList="nodownload"
+                  className={`w-48 ${isMe ? 'self-end' : 'slef-end'}`}
+                />
+              )}
             </div>
           );
         })}
@@ -199,9 +255,19 @@ const Messages = ({ currentUser, chatId, handleLastMessage, isDarkMode }) => {
             </span>
           </div>
         )}
-        <button className="bg-main hover:bg-main-dark text-white p-2 rounded-lg">
-          send
-        </button>
+        {(text || file) && (
+          <button className="bg-main hover:bg-main-dark text-white p-2 rounded-lg">
+            <BiSend />
+          </button>
+        )}
+        {!file && !text && (
+          <button
+            onMouseDown={handleRecord}
+            onMouseUp={handleSendRecord}
+            className="bg-main hover:bg-main-dark text-white p-2 rounded-lg focus:animate-pulse">
+            <BsFillMicFill />
+          </button>
+        )}
       </form>
     </div>
   );

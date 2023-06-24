@@ -1,4 +1,3 @@
-import { AiOutlineSetting } from 'react-icons/ai';
 import { BsPeople } from 'react-icons/bs';
 import { BiMoon } from 'react-icons/bi';
 import { BsSun } from 'react-icons/bs';
@@ -6,12 +5,13 @@ import People from './People';
 import Messages from './Messages';
 import { auth, db } from '../../lib/firebase/firebase';
 import { useAuth } from '../../hooks/use-auth';
-import { useCallback, useRef, useState } from 'react';
+import { BsChatQuote } from 'react-icons/bs';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   collection,
   doc,
   getDoc,
-  getDocs,
+  onSnapshot,
   query,
   serverTimestamp,
   setDoc,
@@ -26,29 +26,10 @@ const Home = () => {
   const [isSelected, setIsSelected] = useState(false);
   const [lastMessage, setLastMessage] = useState('');
   const [isListOpen, setIsListOpen] = useState(false);
-  const inputRef = useRef();
+  const [inputValue, setInputValue] = useState('');
   const idRef = useRef();
   const { isDarkMode, toggleTheme } = useTheme();
 
-  const handleSearch = event => {
-    if (event.key !== 'Enter') return;
-    const userName = inputRef.current.value;
-    if (!userName) return;
-    const userRef = collection(db, 'users');
-    // Our condition.
-    const q = query(userRef, where('enteredName', '==', userName));
-    const queryData = [];
-    getDocs(q)
-      .then(querySnapshot => {
-        querySnapshot.forEach(doc => {
-          queryData.push(doc.data());
-        });
-        setUserQuery(queryData);
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  };
   const handleSelect = async currUser => {
     setCurrentUser(currUser);
     const combinedId =
@@ -57,6 +38,8 @@ const Home = () => {
         : currUser.uid + user.uid;
 
     idRef.current = combinedId;
+    console.log('💥 ~ handleSelect ~ combinedId', combinedId);
+
     try {
       const res = await getDoc(doc(db, 'chats', combinedId));
       if (!res.exists()) {
@@ -94,6 +77,25 @@ const Home = () => {
     setIsListOpen(prev => !prev);
   };
 
+  useEffect(() => {
+    const userRef = collection(db, 'users');
+
+    const q = query(
+      userRef,
+      where('enteredName', '>=', inputValue),
+      where('enteredName', '<', inputValue + '\uf8ff')
+    );
+    const unsub = onSnapshot(q, data => {
+      const users = [];
+      data.forEach(user => {
+        users.push(user.data());
+      });
+      setUserQuery(users);
+    });
+    return () => {
+      unsub();
+    };
+  }, [inputValue]);
   return (
     <div
       className={`flex h-screen overflow-hidden  ${
@@ -153,9 +155,7 @@ const Home = () => {
             type="text"
             className="text-gray-600 bg-light border-b-2 border-gray-300 rounded-lg placeholder:text-sm h-8 px-2 my-4 focus:outline-none placeholder-config caret-slate-400 shadow-lg"
             placeholder="Search for friends"
-            ref={inputRef}
-            onKeyDown={handleSearch}
-            onTouchStart={handleSearch}
+            onChange={e => setInputValue(e.target.value)}
           />
           <div className="overflow-x-hidden h-3/5 scrollbar space-y-3">
             {userQuery.map(user => (
@@ -177,6 +177,12 @@ const Home = () => {
           handleLastMessage={handleLastMessage}
           isDarkMode={isDarkMode}
         />
+      )}
+      {!isSelected && (
+        <div className="flex-1 flex justify-center items-center">
+          <p className="text-main font-bold text-3xl">Let's Make Friends</p>
+          <BsChatQuote className='text-main text-3xl font-bold ml-4' />
+        </div>
       )}
     </div>
   );
