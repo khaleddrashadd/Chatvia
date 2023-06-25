@@ -267,6 +267,8 @@ const Messages = ({ currentUser, chatId, handleLastMessage, isDarkMode }) => {
           <button
             onMouseDown={handleRecord}
             onMouseUp={handleSendRecord}
+            onTouchStart={handleRecord}
+            onTouchEnd={handleSendRecord}
             className="bg-main hover:bg-main-dark text-white p-2 rounded-lg focus:animate-pulse">
             <BsFillMicFill />
           </button>
