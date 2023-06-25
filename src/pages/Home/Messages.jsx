@@ -16,6 +16,8 @@ import { TiTick } from 'react-icons/ti';
 import { createdAt } from '../../utils';
 import { BsFillMicFill } from 'react-icons/bs';
 import { BiSend } from 'react-icons/bi';
+import { createPortal } from 'react-dom';
+import Modal from '../../components/Modal';
 
 const Messages = ({ currentUser, chatId, handleLastMessage, isDarkMode }) => {
   const { user } = useAuth();
@@ -26,7 +28,7 @@ const Messages = ({ currentUser, chatId, handleLastMessage, isDarkMode }) => {
 
   const [file, setFile] = useState('');
   const [text, setText] = useState('');
-  console.log('💥 ~ Messages ~ chatId', chats);
+  const [error, setError] = useState(null);
   useEffect(() => {
     const unsub = onSnapshot(doc(db, 'userChats', currentUser?.uid), doc => {
       setChats(doc.data());
@@ -58,7 +60,7 @@ const Messages = ({ currentUser, chatId, handleLastMessage, isDarkMode }) => {
         'state_changed',
         () => {},
         err => {
-          console.log(err);
+          setError(err);
         },
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then(async downloadURL => {
@@ -123,10 +125,11 @@ const Messages = ({ currentUser, chatId, handleLastMessage, isDarkMode }) => {
         uploadTask.on(
           'state_changed',
           () => {},
-          () => {},
+          err => {
+            setError(err);
+          },
           () => {
             getDownloadURL(uploadTask.snapshot.ref).then(async downloadUrl => {
-              console.log(downloadUrl);
               await updateDoc(doc(db, 'chats', chatId), {
                 messages: arrayUnion({
                   voiceUrl: downloadUrl,
@@ -140,7 +143,7 @@ const Messages = ({ currentUser, chatId, handleLastMessage, isDarkMode }) => {
         );
       };
     } catch (err) {
-      console.log(err);
+      setError(err);
     }
   };
   const handleSendRecord = () => {
@@ -269,6 +272,15 @@ const Messages = ({ currentUser, chatId, handleLastMessage, isDarkMode }) => {
           </button>
         )}
       </form>
+      {error &&
+        createPortal(
+          <Modal
+            title="Error"
+            content={error?.message ?? 'Something Went Wrong'}
+            onClick={() => setError(null)}
+          />,
+          document.getElementById('overlay')
+        )}
     </div>
   );
 };

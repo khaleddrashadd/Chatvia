@@ -38,7 +38,6 @@ const Home = () => {
         : currUser.uid + user.uid;
 
     idRef.current = combinedId;
-    console.log('💥 ~ handleSelect ~ combinedId', combinedId);
 
     try {
       const res = await getDoc(doc(db, 'chats', combinedId));

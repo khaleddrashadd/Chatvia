@@ -3,10 +3,7 @@ import useTheme from '../../hooks/use-theme';
 const People = ({ userQuery, onClick, lastMessage }) => {
   const { isDarkMode } = useTheme();
 
-  console.log('💥 ~ People ~ lastMessage', lastMessage);
-
   return (
-    // <div className="overflow-x-hidden h-3/5 scrollbar">
     <div
       className={`flex items-center cursor-pointer ${
         isDarkMode ? 'bg-light text-black' : 'bg-light text-black'

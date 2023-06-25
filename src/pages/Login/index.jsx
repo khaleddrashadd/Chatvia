@@ -4,7 +4,9 @@ import useInput from '../../hooks/use-input';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../lib/firebase/firebase';
 import { MAIL_REGEX, PASSWORD_REGEX } from '../../utils';
-
+import { createPortal } from 'react-dom';
+import Modal from '../../components/Modal';
+import { useState } from 'react';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -24,6 +26,8 @@ const Register = () => {
     valueIsValid: passwordIsValid,
   } = useInput(value => PASSWORD_REGEX.test(value.trim()));
 
+  const [error, setError] = useState(null);
+
   const handleSubmit = e => {
     e.preventDefault();
 
@@ -34,8 +38,7 @@ const Register = () => {
         navigate('/', { replace: true });
       })
       .catch(error => {
-        const errorMessage = error.message;
-        console.log(errorMessage);
+        setError(error);
       });
   };
   const formIsValid = emailIsValid && passwordIsValid;
@@ -91,6 +94,15 @@ const Register = () => {
           </span>
         </div>
       </div>
+      {error &&
+        createPortal(
+          <Modal
+            title="Error"
+            content={error?.message ?? 'Something Went Wrong'}
+            onClick={() => setError(null)}
+          />,
+          document.getElementById('overlay')
+        )}
     </div>
   );
 };

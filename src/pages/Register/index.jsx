@@ -10,6 +10,8 @@ import { useState } from 'react';
 import { TiTick } from 'react-icons/ti';
 import { MAIL_REGEX, PASSWORD_REGEX } from '../../utils';
 import { NAME_REGEX } from '../../utils/constants';
+import Modal from '../../components/Modal';
+import { createPortal } from 'react-dom';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -38,6 +40,7 @@ const Register = () => {
 
   const [file, setFile] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const formIsValid = emailIsValid && passwordIsValid && nameIsValid;
 
@@ -52,9 +55,9 @@ const Register = () => {
         enteredPassword
       );
 
-      const {user} = userCredential;
+      const { user } = userCredential;
 
-      const storageRef = ref(storage, "avatar/"+enteredName);
+      const storageRef = ref(storage, 'avatar/' + enteredName);
       const uploadTask = uploadBytesResumable(storageRef, file);
 
       uploadTask.on(
@@ -63,7 +66,7 @@ const Register = () => {
           // Handle upload progress or other events if needed
         },
         error => {
-          console.log(error);
+          setError(error);
         },
         async () => {
           try {
@@ -86,16 +89,14 @@ const Register = () => {
             navigate('/', { replace: true });
             setIsLoading(false);
           } catch (err) {
-            console.log(err);
+            setError(err);
           }
         }
       );
     } catch (error) {
-      const errorMessage = error.message;
-      // Handle error if needed
+      setError(error);
     }
   };
-
 
   return (
     <>
@@ -181,6 +182,15 @@ const Register = () => {
           <LoadingSpinner />
         </div>
       )}
+      {error &&
+        createPortal(
+          <Modal
+            title="Error"
+            content={error?.message ?? 'Something Went Wrong'}
+            onClick={() => setError(null)}
+          />,
+          document.getElementById('overlay')
+        )}
     </>
   );
 };
