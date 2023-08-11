@@ -19,11 +19,11 @@ Chatvia is a small chat web app built with react to practice firebase realtime,d
 
 ## Demo
 
-Explore our demo store.
+Explore my demo Chatvia app.
 
 <p align="left">
   <a href="https://chatvia-khaled-app.vercel.app/" target="_blank">
-    <img alt="chatvia-demo" height="35" src="https://raw.githubusercontent.com/evershopcommerce/evershop/dev/.github/images/evershop-admin-demo.png"/>
+    <img alt="chatvia-demo" height="35" src="https://github.com/khaleddrashadd/Chatvia/assets/120561683/3c373997-e247-4983-b300-810d77f38743"/>
   </a>
 </p>
 
@@ -37,6 +37,6 @@ If you like my work, feel free to:
 
 ### Create a bug report
 
-If you see an error message or run into an issue, please [create bug report](https://github.com/khaleddrashadd/Chatvia/issues). This effort is valued and it will help all EverShop users.
+If you see an error message or run into an issue, please [create bug report](https://github.com/khaleddrashadd/Chatvia/issues). This effort is valued.
 
 
