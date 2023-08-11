@@ -1,6 +1,6 @@
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
 <div align="center">
-<img width="60" height="68" alt="EverShop Logo" src="./src/assets/logo.svg"/>
+<img width="60" height="68" alt="Chatvia Logo" src="./src/assets/logo.svg"/>
 </div>
 <div align="center">
   <h1 align="center">Chatvia</h1>
@@ -9,7 +9,7 @@
 
 
 <div align="center">
-<img alt="EverShop" width="950" src="https://github.com/khaleddrashadd/Chatvia/assets/120561683/f2b9c3d7-abc6-45e6-b78c-92cb185e1089"/>
+<img alt="Chatvia" width="950" src="https://github.com/khaleddrashadd/Chatvia/assets/120561683/f2b9c3d7-abc6-45e6-b78c-92cb185e1089"/>
 </div>
 
 ## Introduction
