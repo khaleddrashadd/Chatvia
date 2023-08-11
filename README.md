@@ -20,9 +20,10 @@ Chatvia is a small chat web app built with react to practice firebase realtime,d
 Explore my demo Chatvia app.
 
 <div style="position:relative;">
-  <a href="https://chatvia-khaled-app.vercel.app/" style="position:absolute;to:0;right:0;left:0;bottom:0;" target="_blank">
+`
+  <a href="https://chatvia-khaled-app.vercel.app/" style="position:absolute;to:0;right:0;left:0;bottom:0;z-index:2;" target="_blank">
   </a>
-      <img  alt="chatvia-demo" height="35" src="https://github.com/khaleddrashadd/Chatvia/assets/120561683/3c373997-e247-4983-b300-810d77f38743">
+      <img style="position:absolute;left:0;z-index:1;" alt="chatvia-demo" height="35" src="https://github.com/khaleddrashadd/Chatvia/assets/120561683/3c373997-e247-4983-b300-810d77f38743">
 
 </div>
 
