@@ -14,11 +14,11 @@ import {
   onSnapshot,
   query,
   serverTimestamp,
-  setDoc,
   updateDoc,
   where,
 } from 'firebase/firestore';
-import useTheme from '../../hooks/use-theme';
+import { toggleTheme } from '../../utils/theme-control';
+import { handleSetDoc } from '../../lib/firebase/handle-firebase-data';
 const Home = () => {
   const { user } = useAuth();
   const [userQuery, setUserQuery] = useState([]);
@@ -28,7 +28,6 @@ const Home = () => {
   const [isListOpen, setIsListOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const idRef = useRef();
-  const { isDarkMode, toggleTheme } = useTheme();
 
   const handleSelect = async currUser => {
     setCurrentUser(currUser);
@@ -42,7 +41,7 @@ const Home = () => {
     try {
       const res = await getDoc(doc(db, 'chats', combinedId));
       if (!res.exists()) {
-        await setDoc(doc(db, 'chats', combinedId), { messages: [] });
+        await handleSetDoc('chats', combinedId, { messages: [] });
 
         await updateDoc(doc(db, 'userChats', user.uid), {
           [`${combinedId}.userInfo`]: {
@@ -79,15 +78,17 @@ const Home = () => {
   useEffect(() => {
     const userRef = collection(db, 'users');
 
-    const q = query(
+    const usersQuery = query(
       userRef,
       where('enteredName', '>=', inputValue),
       where('enteredName', '<', inputValue + '\uf8ff')
     );
-    const unsub = onSnapshot(q, data => {
+    const unsub = onSnapshot(usersQuery, data => {
       const users = [];
-      data.forEach(user => {
-        users.push(user.data());
+      data.forEach(userData => {
+        if (userData.data().uid !== user.uid) {
+          users.push(userData.data());
+        }
       });
       setUserQuery(users);
     });
@@ -96,37 +97,27 @@ const Home = () => {
     };
   }, [inputValue]);
   return (
-    <div
-      className={`flex h-screen overflow-hidden  ${
-        isDarkMode ? 'bg-dark' : 'bg-white'
-      }`}>
-      <div
-        className={`flex flex-col items-center gap-24 text-3xl ${
-          isDarkMode ? 'bg-darker text-white' : 'bg-white text-black'
-        }  w-12 py-4`}>
+    <div className="flex h-screen overflow-hidden bg-white dark:bg-dark">
+      <div className="flex flex-col items-center gap-24 text-3xl bg-white text-black dark:bg-darker dark:text-white w-12 py-4">
         <BsPeople
           onClick={handleToggleFriend}
           className={`cursor-pointer ${
             isListOpen && 'text-main'
           } hover:text-main-dark`}
         />
-        {isDarkMode ? (
-          <BsSun
-            onClick={() => toggleTheme(false)}
-            className={`cursor-pointer hover:text-main-dark`}
-          />
-        ) : (
-          <BiMoon
-            onClick={() => toggleTheme(true)}
-            className={`cursor-pointer hover:text-main-dark`}
-          />
-        )}
+
+        <BsSun
+          onClick={() => toggleTheme()}
+          className="cursor-pointer hover:text-main-dark hidden dark:block"
+        />
+
+        <BiMoon
+          onClick={() => toggleTheme()}
+          className="cursor-pointer hover:text-main-dark dark:hidden"
+        />
       </div>
       {isListOpen && (
-        <div
-          className={`${
-            isDarkMode ? 'bg-darkest' : 'bg-lighter'
-          } px-4 py-3 h-full`}>
+        <div className="dark:bg-darkest bg-lighter">
           <h3 className="font-bold text-main text-center rounded-md text-3xl mb-4">
             Chatvia
           </h3>
@@ -137,10 +128,7 @@ const Home = () => {
                 alt="avatar"
                 className="w-8 h-8 rounded-full inline mr-2 object-cover"
               />
-              <span
-                className={`font-semibold ${
-                  isDarkMode ? 'text-gray-300' : 'text-gray-600'
-                }`}>
+              <span className=" dark:text-gray-300 text-gray-600 font-semibold">
                 {user?.displayName}
               </span>
             </div>
@@ -174,13 +162,12 @@ const Home = () => {
           currentUser={currentUser}
           chatId={idRef.current}
           handleLastMessage={handleLastMessage}
-          isDarkMode={isDarkMode}
         />
       )}
       {!isSelected && (
         <div className="flex-1 flex justify-center items-center">
           <p className="text-main font-bold text-3xl">Let's Make Friends</p>
-          <BsChatQuote className='text-main text-3xl font-bold ml-4' />
+          <BsChatQuote className="text-main text-3xl font-bold ml-4" />
         </div>
       )}
     </div>

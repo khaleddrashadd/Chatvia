@@ -2,16 +2,16 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Input, LoadingSpinner } from '../../components';
 import { addAvatar } from '../../assets';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { storage, auth, db } from '../../lib/firebase/firebase';
+import { storage, auth } from '../../lib/firebase/firebase';
 import useInput from '../../hooks/use-input';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { doc, setDoc } from 'firebase/firestore';
 import { useState } from 'react';
 import { TiTick } from 'react-icons/ti';
 import { MAIL_REGEX, PASSWORD_REGEX } from '../../utils';
 import { NAME_REGEX } from '../../utils/constants';
 import Modal from '../../components/Modal';
 import { createPortal } from 'react-dom';
+import { handleSetDoc } from '../../lib/firebase/handle-firebase-data';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -69,33 +69,29 @@ const Register = () => {
           setError(error);
         },
         async () => {
-          try {
-            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
 
-            await updateProfile(user, {
-              displayName: enteredName,
-              photoURL: downloadURL,
-            });
+          await updateProfile(user, {
+            displayName: enteredName,
+            photoURL: downloadURL,
+          });
 
-            await setDoc(doc(db, 'users', user.uid), {
-              uid: user.uid,
-              enteredName,
-              enteredEmail,
-              photoURL: downloadURL,
-            });
+          const useData = {
+            uid: user.uid,
+            enteredName,
+            enteredEmail,
+            photoURL: downloadURL,
+          };
 
-            await setDoc(doc(db, 'userChats', user.uid), {});
-
-            navigate('/', { replace: true });
-            setIsLoading(false);
-          } catch (err) {
-            setError(err);
-          }
+          await handleSetDoc('users', user.uid, useData);
+          await handleSetDoc('userChats', user.uid, {});
+          navigate('/', { replace: true });
         }
       );
     } catch (error) {
       setError(error);
     }
+    setIsLoading(false);
   };
 
   return (

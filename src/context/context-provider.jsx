@@ -10,7 +10,7 @@ const AuthContextProvider = ({ children }) => {
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, user => {
       setUser(user);
-      setIsLoading(false)
+      setIsLoading(false);
     });
     return () => {
       unsub();
@@ -18,7 +18,7 @@ const AuthContextProvider = ({ children }) => {
   }, []);
 
   return (
-    <authContext.Provider value={{ user, isLoading  }}>
+    <authContext.Provider value={{ user, isLoading }}>
       {children}
     </authContext.Provider>
   );

@@ -6,20 +6,20 @@ import {
   doc,
   onSnapshot,
   serverTimestamp,
-  updateDoc,
 } from 'firebase/firestore';
 import { db, storage } from '../../lib/firebase/firebase';
 import { useAuth } from '../../hooks/use-auth';
 import { v4 as uuid } from 'uuid';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { TiTick } from 'react-icons/ti';
-import { createdAt } from '../../utils';
 import { BsFillMicFill } from 'react-icons/bs';
 import { BiSend } from 'react-icons/bi';
+import { createdAt } from '../../utils';
 import { createPortal } from 'react-dom';
 import Modal from '../../components/Modal';
+import { handleUpdateDoc } from '../../lib/firebase/handle-firebase-data';
 
-const Messages = ({ currentUser, chatId, handleLastMessage, isDarkMode }) => {
+const Messages = ({ currentUser, chatId, handleLastMessage }) => {
   const { user } = useAuth();
   const [chats, setChats] = useState([]);
   const scrollRef = useRef();
@@ -70,9 +70,11 @@ const Messages = ({ currentUser, chatId, handleLastMessage, isDarkMode }) => {
               senderId: user.uid,
               createdAt: Timestamp.now(),
             };
-            await updateDoc(doc(db, 'chats', chatId), {
+
+            await handleUpdateDoc('chats', chatId, {
               messages: arrayUnion(message),
             });
+
             setText('');
             setFile('');
           });
@@ -86,17 +88,18 @@ const Messages = ({ currentUser, chatId, handleLastMessage, isDarkMode }) => {
         senderId: user.uid,
         createdAt: Timestamp.now(),
       };
-      await updateDoc(doc(db, 'chats', chatId), {
+      await handleUpdateDoc('chats', chatId, {
         messages: arrayUnion(message),
       });
     }
-    await updateDoc(doc(db, 'userChats', user.uid), {
+    await handleUpdateDoc('userChats', user.uid, {
       [`${chatId}.lastMessage`]: {
         text,
       },
       [`${chatId}.date`]: serverTimestamp(),
     });
-    await updateDoc(doc(db, 'userChats', currentUser.uid), {
+
+    await handleUpdateDoc('userChats', currentUser.uid, {
       [`${chatId}.lastMessage`]: {
         text,
       },
@@ -130,7 +133,7 @@ const Messages = ({ currentUser, chatId, handleLastMessage, isDarkMode }) => {
           },
           () => {
             getDownloadURL(uploadTask.snapshot.ref).then(async downloadUrl => {
-              await updateDoc(doc(db, 'chats', chatId), {
+              await handleUpdateDoc('chats', chatId, {
                 messages: arrayUnion({
                   voiceUrl: downloadUrl,
                   senderId: user.uid,
@@ -153,9 +156,7 @@ const Messages = ({ currentUser, chatId, handleLastMessage, isDarkMode }) => {
     <div className="flex-1 flex flex-col pb-4">
       <div
         key={chats[chatId]}
-        className={`flex items-center justify-center ${
-          isDarkMode ? 'bg-darker text-white' : 'bg-light text-black'
-        } py-3`}>
+        className="flex items-center justify-center dark:bg-darker dark:text-white bg-light text-black py-3">
         <img
           src={chats[chatId]?.userInfo?.photoURL}
           alt="avatar"
@@ -229,9 +230,7 @@ const Messages = ({ currentUser, chatId, handleLastMessage, isDarkMode }) => {
           value={text}
           type="text"
           placeholder="Type something ..."
-          className={`w-full font-medium text-lg p-2 ${
-            isDarkMode && 'bg-darker text-white'
-          } rounded-lg border-2 focus:outline-main`}
+          className="w-full font-medium text-lg p-2 dark:bg-darker dark:text-white rounded-lg border-2 focus:outline-main"
         />
         <label htmlFor="file">
           <img

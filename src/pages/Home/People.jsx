@@ -1,13 +1,9 @@
-import useTheme from '../../hooks/use-theme';
-
 const People = ({ userQuery, onClick, lastMessage }) => {
-  const { isDarkMode } = useTheme();
-
   return (
     <div
-      className={`flex items-center cursor-pointer ${
-        isDarkMode ? 'bg-light text-black' : 'bg-light text-black'
-      } hover:bg-main hover:text-white duration-300 rounded-lg`}
+      className="flex items-center cursor-pointer
+        dark:bg-light dark:text-black'bg-light text-black
+       hover:bg-main hover:text-white duration-300 rounded-lg"
       onClick={onClick}>
       <img
         src={userQuery?.photoURL}
