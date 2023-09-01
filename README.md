@@ -5,12 +5,14 @@
 <div align="center">
   <h1 align="center">Chatvia</h1>
 </div>
-    <a style="display:flex;justify-content:center;margin-bottom:1rem; font-weight:bold;" href="https://chatvia-khaled-app.vercel.app/">Demo</a>
 
 
+  <a href="https://chatvia-khaled-app.vercel.app/">
 <div align="center">
 <img alt="Chatvia" width="950" src="https://github.com/khaleddrashadd/Chatvia/assets/120561683/f2b9c3d7-abc6-45e6-b78c-92cb185e1089"/>
 </div>
+</a>
+
 
 ## Introduction
 
